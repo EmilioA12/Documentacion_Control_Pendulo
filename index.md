@@ -60,7 +60,7 @@ registros, capturas y videos del laboratorio.
 
 ## Equipo de trabajo
 
-Integrantes: pendiente de completar.
+Integrantes: Emilio Acuña, Angel, Joel.
 
 ## Fuentes y créditos
 
