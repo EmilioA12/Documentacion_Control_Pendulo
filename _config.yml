@@ -1,0 +1,24 @@
+title: "Péndulo invertido"
+description: "Proyecto de Control Avanzado y Robótica — Quanser Qube-Servo 3"
+
+url: "https://emilioa12.github.io"
+baseurl: "/Documentacion_Control_Pendulo"
+
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-remote-theme
+
+lang: es
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+
+aux_links:
+  "Repositorio en GitHub":
+    - "https://github.com/EmilioA12/Documentacion_Control_Pendulo"
+
+aux_links_new_tab: true
+
+exclude:
+  - README.md
