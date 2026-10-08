@@ -49,24 +49,51 @@ Cada componente multiplica el estado correspondiente. Es
 necesario conservar el mismo orden de estados en MATLAB
 y en el vector construido en Simulink.
 
-Para una referencia de posición del brazo, el modelo utiliza:
+En la implementación final, la referencia del brazo es cero.
+La posición deseada del péndulo corresponde a la vertical
+superior y las velocidades deseadas también son cero:
 
 $$
 x_{\mathrm{ref}}=
 \begin{bmatrix}
-\theta_{\mathrm{ref}} & 0 & 0 & 0
-\end{bmatrix}^{T},
-\qquad
-u=K(x_{\mathrm{ref}}-x).
+0 & 0 & 0 & 0
+\end{bmatrix}^{T}.
 $$
 
-Cuando la referencia es cero, esta expresión se reduce a
-la ley de regulación u = −Kx.
+El controlador recibe las posiciones medidas y las
+velocidades estimadas por los observadores:
 
-Para una referencia constante, este vector representa un
-equilibrio del modelo lineal. Una referencia variable introduce
-un problema de seguimiento cuyo desempeño debe evaluarse
-por separado.
+$$
+x_c=
+\begin{bmatrix}
+\theta & \alpha & \widehat{\dot{\theta}} &
+\widehat{\dot{\alpha}}
+\end{bmatrix}^{T}.
+$$
+
+Por tanto, la ley implementada durante el balance es:
+
+$$
+u=K(x_{\mathrm{ref}}-x_c)=-Kx_c.
+$$
+
+Desarrollando sus componentes:
+
+$$
+u=
+-k_{\theta}\theta
+-k_{\alpha}\alpha
+-k_{\dot{\theta}}\widehat{\dot{\theta}}
+-k_{\dot{\alpha}}\widehat{\dot{\alpha}}.
+$$
+
+La ganancia K se diseña utilizando el modelo físico A, B.
+Los observadores proporcionan las velocidades necesarias
+para aplicar esa realimentación en el equipo.
+
+La referencia cero se implementa mediante un bloque
+`Ground` conectado a la entrada positiva del sumador.
+El vector de realimentación entra por la entrada negativa.
 
 ## 3. Función de costo
 
@@ -267,8 +294,8 @@ a desaparecer.
 
 El análisis de A−BK no incluye explícitamente:
 
-- La dinámica de los filtros usados para calcular velocidades.
-- El observador y su futura integración.
+- La dinámica de los dos observadores que proporcionan
+  las velocidades estimadas al controlador.
 - Los límites de voltaje del equipo.
 - El muestreo y los retardos de ejecución.
 - La lógica que activa y desactiva el balance.
@@ -278,36 +305,85 @@ Por tanto, estos polos verifican el diseño ideal del LQR.
 La estabilidad y el desempeño de la implementación completa
 requieren comprobaciones adicionales y evidencia experimental.
 
-## 8. Correspondencia con Simulink
+## 8. Correspondencia con el Simulink final
 
-En el nivel principal del modelo se construye la diferencia:
+### Formación del vector de realimentación
+
+El subsistema `State X` construye el vector que recibe
+el controlador mediante un bloque Mux.
+
+| Entrada del Mux | Señal utilizada | Procedencia |
+|---|---|---|
+| 1 | Posición angular del brazo, θ | Encoder y conversión a radianes |
+| 2 | Posición angular del péndulo, α | Encoder y conversión a radianes |
+| 3 | Velocidad estimada del brazo | Salida `dot` de `Observador Theta` |
+| 4 | Velocidad estimada del péndulo | Salida `dot` de `Observador Alpha` |
+
+Las posiciones estimadas por los observadores se envían
+a `Scope Theta` y `Scope Alpha` para compararlas con las
+mediciones. El controlador utiliza las posiciones medidas.
+
+Los filtros de derivación de la versión anterior permanecen
+en el archivo, pero sus salidas no alimentan el vector
+de realimentación del controlador final.
+
+### Cálculo del comando
+
+La entrada positiva del sumador está conectada a `Ground`.
+La entrada negativa recibe el vector de realimentación.
+Por tanto, el sumador entrega:
 
 $$
-x_{\mathrm{ref}}-x.
+0-x_c=-x_c.
 $$
 
-Esta diferencia entra al bloque de ganancia K, por lo que
-la señal calculada es:
+Aunque el bloque de ganancia se llama `u = -K*x`,
+su parámetro es `K`. El signo negativo ya se obtiene
+en el sumador:
 
 $$
-u=K(x_{\mathrm{ref}}-x).
+u=K(-x_c)=-Kx_c.
 $$
 
-Aunque el bloque se llama `u = -K*x`, su parámetro de ganancia
-es K. El signo de realimentación negativa se obtiene mediante
-la resta realizada antes del bloque.
+Los ángulos utilizados para este cálculo están en radianes
+y las velocidades estimadas en radianes por segundo.
 
-En la versión entregada:
+### Habilitación del balance
 
-- Los ángulos proceden de los encoders.
-- Las velocidades proceden de filtros de derivación.
-- El observador de la figura 3 no alimenta al controlador.
-- Un selector envía el control de balance o 0 V según el ángulo.
-- La condición programada es ±15°, frente a ±10° solicitado.
+El ángulo medido del péndulo se convierte a grados
+antes de entrar al bloque MATLAB Function que determina
+si el controlador debe activarse.
 
-La ganancia de 15 que escala la referencia del brazo y el
-umbral de ±15° que habilita el balance son configuraciones
-diferentes. Cambiar el umbral no implica cambiar la referencia.
+En el archivo final revisado, la condición es:
+
+$$
+-15^\circ \leq \alpha_{\mathrm{deg}} \leq 15^\circ.
+$$
+
+Cuando se cumple, el selector `Enable Balance Control Switch`
+envía el comando calculado por el LQR. Fuera de esa ventana,
+envía 0 V.
+
+El péndulo se eleva manualmente hasta la zona de balance;
+no se implementa una maniobra automática de swing-up.
+
+El documento del curso y el procedimiento de Quanser
+indican una ventana de ±10°. El archivo revisado conserva
+±15°; esta diferencia debe resolverse y documentarse
+antes de declarar cumplimiento completo de ese requisito.
+
+### Adaptación respecto al laboratorio de Quanser
+
+La estructura de realimentación y la interfaz con el equipo
+se basan en el laboratorio LQR de Quanser.
+
+En este proyecto se utiliza una referencia cero del brazo,
+las ponderaciones Q y R del script final y las velocidades
+estimadas mediante los observadores desarrollados
+por Emilio Acuña a partir del esquema del curso.
+
+El archivo final no utiliza una referencia variable del brazo
+ni una ganancia de 15 para escalarla.
 
 ## 9. Comprobación reproducible en MATLAB
 
@@ -365,8 +441,8 @@ establecimiento sin datos que los respalden.
 
 ## 11. Referencias
 
-- Código del equipo: `ProyectoControlDinal(3).m`.
-- Modelo del equipo: `Projecto_control_qs3_lqr_ctrl(2).slx`.
+- Código del equipo: `ProyectoControlAvanzadoFinalPenduloCode.m`.
+- Modelo del equipo: `qs3_lqr_ctrl_simulinkFInal.slx`.
 - Instrucciones del proyecto: primera parte de la evaluación.
 - [Quanser: guía de control LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/application_guide_lqr_control.pdf).
 - [MathWorks: documentación de lqr](https://www.mathworks.com/help/control/ref/lti.lqr.html).
