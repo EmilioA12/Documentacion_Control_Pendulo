@@ -39,9 +39,48 @@ $$
 
 La posición invertida corresponde a α = 0.
 
-Los encoders proporcionan posiciones angulares. En la
-implementación inicial, las velocidades se obtienen mediante
-derivación filtrada de estas posiciones.
+Los encoders proporcionan las posiciones angulares del brazo
+y del péndulo. En la implementación final, cada posición medida
+alimenta un observador que estima su velocidad angular.
+
+Es importante distinguir el vector de estados físicos del
+modelo del vector utilizado en la realimentación.
+
+El modelo matemático describe los estados:
+
+$$
+x=
+\begin{bmatrix}
+\theta & \alpha & \dot{\theta} & \dot{\alpha}
+\end{bmatrix}^{T}.
+$$
+
+En Simulink, el controlador recibe:
+
+$$
+x_c=
+\begin{bmatrix}
+\theta & \alpha & \widehat{\dot{\theta}} &
+\widehat{\dot{\alpha}}
+\end{bmatrix}^{T}.
+$$
+
+Los dos primeros elementos son las posiciones medidas por
+los encoders. Los dos últimos son las velocidades estimadas
+por los subsistemas `Observador Theta` y `Observador Alpha`.
+
+Las posiciones estimadas por los observadores se comparan
+con las mediciones en los Scopes, pero no sustituyen las
+posiciones medidas dentro del vector de realimentación.
+
+El modelo base de Quanser obtiene las velocidades mediante
+derivación filtrada. En nuestra implementación final, las
+velocidades utilizadas por el LQR proceden de los observadores.
+
+El diseño de sus ganancias y su implementación fueron
+realizados por Emilio Acuña siguiendo el esquema de la
+figura 3 del documento del curso. Su desarrollo se presenta
+en la sección dedicada al observador.
 
 Las conversiones de cuentas a radianes y los signos utilizados
 en la interfaz se documentan en la sección de implementación.
@@ -323,13 +362,49 @@ El script entregado calcula A y B, pero no define C y D.
 
 ## 10. Fuentes y trazabilidad
 
-- Instrucciones del proyecto: sección del Equipo B y Cuadro 2.
-- Código del equipo: `ProyectoControlDinal(3).m`.
-- [Quanser: manual del Qube-Servo 3](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/3_user_manuals/qube_servo3/Qube_Servo3_user_manual.pdf).
-- [Quanser: parámetros del laboratorio LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/qube3_rotpen_param.m).
-- [Quanser: procedimiento del laboratorio LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/lab_procedure_lqr_control.pdf).
+### Material del curso
 
-Los parámetros y las matrices de referencia proceden del material
-proporcionado y de Quanser. El desarrollo intermedio de esta página
-explica cómo se obtienen las expresiones utilizadas en el código;
-no constituye evidencia de identificación experimental.
+El documento del proyecto de Control Avanzado y Robótica,
+en la sección del Equipo B y el Cuadro 2, proporciona los
+parámetros y las expresiones de las matrices utilizadas
+para el péndulo invertido.
+
+### Recursos de Quanser
+
+- [Parámetros del péndulo: qube3_rotpen_param.m](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/qube3_rotpen_param.m).
+- [Procedimiento del laboratorio LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/lab_procedure_lqr_control.pdf).
+- [Guía teórica del control LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/application_guide_lqr_control.pdf).
+- [Modelo base de Simulink: qs3_lqr_ctrl.slx](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/qs3_lqr_ctrl.slx).
+
+Los parámetros del script del proyecto coinciden con
+`qube3_rotpen_param.m`. Las matrices numéricas A y B
+coinciden, al redondeo mostrado, con las publicadas en
+el procedimiento del laboratorio LQR de Quanser.
+
+El archivo `rotpen_ABCD_eqns_ip.m` incluido en esa carpeta
+del laboratorio es una plantilla que debe completarse.
+La comprobación de las matrices se realiza contra los
+resultados publicados en el procedimiento y las
+expresiones del documento del curso.
+
+### Archivos finales del proyecto
+
+- Código MATLAB: `ProyectoControlAvanzadoFinalPenduloCode.m`.
+- Modelo Simulink: `qs3_lqr_ctrl_simulinkFInal.slx`.
+
+El script implementa los parámetros y las matrices A y B,
+calcula la ganancia LQR y obtiene las ganancias del observador.
+
+El modelo Simulink integra las mediciones del equipo,
+los observadores y la ley de control.
+
+### Alcance del desarrollo presentado
+
+Las ecuaciones intermedias de esta página explican cómo
+se obtienen las matrices implementadas en el código,
+conservando su convención de signos.
+
+La coincidencia con las referencias verifica la formulación
+del modelo nominal. La validación experimental requiere
+comparar sus resultados con las mediciones del equipo,
+lo cual se aborda en la sección de resultados.
