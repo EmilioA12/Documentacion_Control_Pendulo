@@ -96,7 +96,7 @@ del funcionamiento físico.
 
 ## Equipo de trabajo
 
-Emilio Acuña, Angel y Joel.
+Emilio Acuña, Angel y Joel Rio Valle.
 
 ## Fuentes y créditos
 
