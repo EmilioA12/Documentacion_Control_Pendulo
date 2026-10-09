@@ -90,9 +90,13 @@ mientras que la consigna y el procedimiento de Quanser
 indican ±10°. Esta diferencia se documentará en la sección
 de implementación junto con su resolución.
 
-Las gráficas y los videos del laboratorio se incorporarán
-a la sección de resultados para respaldar el análisis
-del funcionamiento físico.
+Las cuatro gráficas experimentales disponibles y su análisis
+se presentan en la sección de
+[Resultados y discusión]({{ '/05-resultados.html' | relative_url }}).
+
+Se documentan la elevación manual, el balance, las
+perturbaciones y el seguimiento de los observadores,
+junto con las limitaciones visibles en las capturas.
 
 ## Equipo de trabajo
 
