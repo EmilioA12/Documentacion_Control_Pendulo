@@ -401,7 +401,3 @@ de los programas que se entrega y documenta.
 - [Quanser: modelo base de Simulink](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/qs3_lqr_ctrl.slx).
 - [Quanser: procedimiento del laboratorio LQR](https://github.com/quanser/Quanser_Academic_Resources/blob/dev-windows/6_teaching/1_Controls/Qube_Servo_3/sp6_pendulum_control/1b_lqr_control/hardware/matlab/lab_procedure_lqr_control.pdf).
 
-La estructura base de comunicación y control se adapta
-del material de Quanser. El diseño de ganancias
-y la implementación de los observadores fueron
-realizados por Emilio Acuña siguiendo el esquema del curso.

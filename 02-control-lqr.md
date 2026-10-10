@@ -424,22 +424,8 @@ disp(estable_modelo_lineal);
 Este bloque se propone para reproducir la revisión.
 No se presenta como una prueba experimental ya realizada.
 
-## 10. Evidencia pendiente
 
-Para completar la validación se requieren:
-
-- Captura de MATLAB mostrando K y los polos.
-- Gráficas de referencia y posición del brazo.
-- Gráficas del ángulo del péndulo.
-- Registro del comando de voltaje.
-- Condiciones y duración de cada prueba.
-- Video del balance en el equipo físico.
-
-Las métricas se calcularán sobre los registros disponibles.
-No se asignan valores de sobreimpulso, error o tiempo de
-establecimiento sin datos que los respalden.
-
-## 11. Referencias
+## 10. Referencias
 
 - Código del equipo: `ProyectoControlAvanzadoFinalPenduloCode.m`.
 - Modelo del equipo: `qs3_lqr_ctrl_simulinkFInal.slx`.
